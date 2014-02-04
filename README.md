@@ -20,14 +20,6 @@ For benchmarks, see [A Comparison of JS Publish/Subscribe Approaches](http://jsp
 * Easy to understand and use (thanks to synchronization decoupling)
 * Small(ish), less than 1kb minified and gzipped
 
-## Getting PubSubJS
-
-There are several ways of getting PubSubJS
-
-* [Download a tagged version](https://github.com/mroderick/PubSubJS/tags) from GitHub
-* Install via npm (`npm install pubsub-js`)
-* Intall via bower (`bower install pubsub-js`)
-
 ## Examples
 
 ### Basic example
@@ -38,19 +30,21 @@ var mySubscriber = function( msg, data ){
     console.log( msg, data );
 };
 
+var publisher = createPublisher();
+
 // add the function to the list of subscribers for a particular message
 // we're keeping the returned token, in order to be able to unsubscribe
 // from the message later on
-var token = PubSub.subscribe( 'MY MESSAGE', mySubscriber );
+var token = publisher.subscribe( 'MY MESSAGE', mySubscriber );
 
 // publish a message asyncronously
-PubSub.publish( 'MY MESSAGE', 'hello world!' );
+publisher.publish( 'MY MESSAGE', 'hello world!' );
 
 // publish a message syncronously, which is faster in some environments,
 // but will get confusing when one message triggers new messages in the
 // same execution chain
 // USE WITH CAUTION, HERE BE DRAGONS!!!
-PubSub.publishSync( 'MY MESSAGE', 'hello world!' );
+publisher.publishSync( 'MY MESSAGE', 'hello world!' );
 ```
 
 ### Cancel specific subscripiton
@@ -61,13 +55,15 @@ var mySubscriber = function( msg, data ){
     console.log( msg, data );
 };
 
+var publisher = createPublisher();
+
 // add the function to the list of subscribers to a particular message
 // we're keeping the returned token, in order to be able to unsubscribe
 // from the message later on
-var token = PubSub.subscribe( 'MY MESSAGE', mySubscriber );
+var token = publisher.subscribe( 'MY MESSAGE', mySubscriber );
 
 // unsubscribe from further messages
-PubSub.unsubscribe( token );
+publisher.unsubscribe( token );
 ```
 
 ### Cancel all subscriptions for a function
@@ -78,13 +74,15 @@ var mySubscriber = function( msg, data ){
     console.log( msg, data );
 };
 
+var publisher = createPublisher();
+
 // add the function to the list of subscribers to a particular message
 // we're keeping the returned token, in order to be able to unsubscribe
 // from the message later on
-var token = PubSub.subscribe( 'MY MESSAGE', mySubscriber );
+var token = publisher.subscribe( 'MY MESSAGE', mySubscriber );
 
 // unsubscribe mySubscriber from ALL further messages
-PubSub.unsubscribe( mySubscriber );
+publisher.unsubscribe( mySubscriber );
 ```
 
 ### Hierarchical addressing
@@ -95,8 +93,10 @@ var myToplevelSubscriber = function( msg, data ){
     console.log( 'top level: ', msg, data );
 }
 
+var publisher = createPublisher();
+
 // subscribe to all topics in the 'car' hierarchy
-PubSub.subscribe( 'car', myToplevelSubscriber );
+publisher.subscribe( 'car', myToplevelSubscriber );
 
 // create a subscriber to receive only leaf message from hierarchy op topics
 var mySpecificSubscriber = function( msg, data ){
@@ -104,12 +104,12 @@ var mySpecificSubscriber = function( msg, data ){
 }
 
 // subscribe only to 'car.drive' topics
-PubSub.subscribe( 'car.drive', mySpecificSubscriber );
+publisher.subscribe( 'car.drive', mySpecificSubscriber );
 
 // Publish some topics
-PubSub.publish( 'car.purchase', { name : 'my new car' } );
-PubSub.publish( 'car.drive', { speed : '14' } );
-PubSub.publish( 'car.sell', { newOwner : 'someone else' } );
+publisher.publish( 'car.purchase', { name : 'my new car' } );
+publisher.publish( 'car.drive', { speed : '14' } );
+publisher.publish( 'car.sell', { newOwner : 'someone else' } );
 
 // In this scenario, myToplevelSubscriber will be called for all
 // topics, three times in total
@@ -126,20 +126,22 @@ when you make typos.
 ### Example of use of "constants"
 
 ```javascript
+var publisher = createPublisher();
+
 // BAD
-PubSub.subscribe("hello", function( msg, data ){
+publisher.subscribe("hello", function( msg, data ){
 	console.log( data )
 });
 
-PubSub.publish("helo", "world");
+publisher.publish("hello", "world");
 
 // BETTER
 var MY_TOPIC = "hello";
-PubSub.subscribe(MY_TOPIC, function( msg, data ){
+publisher.subscribe(MY_TOPIC, function( msg, data ){
 	console.log( data )
 });
 
-PubSub.publish(MY_TOPIC, "world");
+publisher.publish(MY_TOPIC, "world");
 ```
 
 ### Immediate Exceptions for stack traces in developer tools
@@ -151,7 +153,8 @@ This should be considered a development only option, as PubSubJS was designed to
 Setting immediate exceptions in development is easy, just tell PubSubJS about it after it's been loaded.
 
 ```javascript
-PubSub.immediateExceptions = true;
+var publisher = createPublisher();
+publisher.immediateExceptions = true;
 ```
 
 ## Plugin for jQuery
@@ -185,7 +188,7 @@ $.pubsub('publish', topic, data);
 $.pubsub('publishSync', topic, data);
 ```
 
-In the jQuery build, the global ```PubSub``` global is still available, so you can mix and match both ```Pubsub``` and ```$.pubsub``` as needed.
+In the jQuery build, the global ```createPublisher``` global is still available, so you can mix and match both ```createPublisher``` and ```$.pubsub``` as needed.
 
 There is also an article about [Using PubSubJS with jQuery](http://roderick.dk/resources/using-pubsubjs-with-jquery/)
 

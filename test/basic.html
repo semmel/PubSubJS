@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Basic PubSub Test</title>
+	<script src="../src/pubsub.js"></script>
+</head>
+<body>
+	<div id="concert-palace" style="border-color: black; border: 1px; border-style: solid">
+		Concert Palace:<br/>
+		<button type="button" id="unsubscribe-palace">Unsubscribe</button><br/>
+		<button type="button" id="announce-palace">Announce</button><br/>
+	</div>
+	<div id="big-venue" style="border-color: red; border: 1px; border-style: solid">
+		Big Venue:<br />
+		<button type="button" id="unsubscribe-venue">Unsubscribe</button><br/>
+		<button type="button" id="announce-venue">Announce</button><br/>
+	</div>
+
+<script>
+
+	var palace = createPublisher();
+	var venue = createPublisher();
+
+	var palaceBoard = document.getElementById("concert-palace");
+	var venueBoard = document.getElementById("big-venue");
+
+	function tellWhat(target, what)
+	{
+		target.insertAdjacentHTML("beforeend", Array.prototype.slice.call(arguments, 1).join(", ")
+				+ "<br/>");
+	}
+
+	var palaceSubscription = palace.subscribe("mega event", tellWhat.bind(undefined, palaceBoard));
+
+	palace.publish("mega event", "Scooter is in the house!");
+
+	var venueSubscription = venue.subscribe("mega event", tellWhat.bind(undefined, venueBoard));
+
+	palace.publish("mega event", "HIP is in the house!");
+
+	venue.publish("mega event", "Die Doofen sind da!");
+
+	document.getElementById("unsubscribe-palace").addEventListener('click'
+			, function()
+			{
+				palace.unsubscribe(palaceSubscription);
+			}, false);
+
+	document.getElementById("unsubscribe-venue").addEventListener('click'
+			, function()
+			{
+				venue.unsubscribe(venueSubscription);
+			}, false);
+
+	document.getElementById("announce-palace").addEventListener('click'
+			, function()
+			{
+				palace.publish("mega event", "Grand Palace Opening");
+			}, false);
+
+	document.getElementById("announce-venue").addEventListener('click'
+			, function()
+			{
+				venue.publish("mega event", "Venue Birthday Party");
+			}, false);
+
+
+</script>
+</body>
+</html>
