@@ -1,12 +1,14 @@
 # PubSubJS
 
-[![Build Status](https://travis-ci.org/mroderick/PubSubJS.png)](https://travis-ci.org/mroderick/PubSubJS) [![NPM version](https://badge.fury.io/js/pubsub-js.png)](http://badge.fury.io/js/pubsub-js)
-
 PubSubJS is a dependency free [publish/subscribe](http://en.wikipedia.org/wiki/Publish/subscribe) library for [JavaScript](https://developer.mozilla.org/en/JavaScript).
 
 PubSubJS has synchronisation decoupling, so messages are delivered asynchronously. This helps keep your program predictable as the originator of messages will not be blocked while consumers process messages.
 
 For the adventurous, PubSubJS also supports synchronous message publication. This can give a speedup in some environments (browsers, not all), but can also lead to some very difficult to reason about programs, when one message triggers publication of another message in the same execution chain.
+
+## Changes to the original project
+
+* PubSub is instantiable. I.e. there is no singleton `PubSub` as in [@mroderick's original branch](https://github.com/mroderick/PubSubJS). Instead there is the creation function `createPublisher`.
 
 For benchmarks, see [A Comparison of JS Publish/Subscribe Approaches](http://jsperf.com/pubsubjs-vs-jquery-custom-events/51)
 
