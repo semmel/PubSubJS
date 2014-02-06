@@ -62,13 +62,13 @@ var publisher = createPublisher();
 // add the function to the list of subscribers to a particular message
 // we're keeping the returned token, in order to be able to unsubscribe
 // from the message later on
-var token = publisher.subscribe( 'MY MESSAGE', mySubscriber );
+var subscription = publisher.subscribe( 'MY MESSAGE', mySubscriber );
 
 // unsubscribe from further messages
-publisher.unsubscribe( token );
+subscription.dispose();
 ```
 
-### Cancel all subscriptions for a function
+### Cancel all subscriptions for a function or any
 
 ```javascript
 // create a function to receive the message
@@ -81,10 +81,13 @@ var publisher = createPublisher();
 // add the function to the list of subscribers to a particular message
 // we're keeping the returned token, in order to be able to unsubscribe
 // from the message later on
-var token = publisher.subscribe( 'MY MESSAGE', mySubscriber );
+var subscription = publisher.subscribe( 'MY MESSAGE', mySubscriber );
 
 // unsubscribe mySubscriber from ALL further messages
 publisher.unsubscribe( mySubscriber );
+
+// dispose ALL subscribers, e.g. before the publisher is destroyed.
+publisher.unsubscribeAll();
 ```
 
 ### Hierarchical addressing

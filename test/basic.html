@@ -14,7 +14,12 @@
 		Big Venue:<br />
 		<button type="button" id="unsubscribe-venue">Unsubscribe</button><br/>
 		<button type="button" id="announce-venue">Announce</button><br/>
+		<button type="button" id="unsubscribe-all">Unsubscribe All From Venue</button>
 	</div>
+	<br/>
+
+	<div style="font-weight: bold" id="ticker">Ticker:<br /></div>
+
 
 <script>
 
@@ -23,12 +28,15 @@
 
 	var palaceBoard = document.getElementById("concert-palace");
 	var venueBoard = document.getElementById("big-venue");
+	var tickerBoard = document.getElementById("ticker");
 
 	function tellWhat(target, what)
 	{
 		target.insertAdjacentHTML("beforeend", Array.prototype.slice.call(arguments, 1).join(", ")
 				+ "<br/>");
 	}
+
+	var tickerSubscription = venue.subscribe("mega event", tellWhat.bind(undefined, tickerBoard));
 
 	var palaceSubscription = palace.subscribe("mega event", tellWhat.bind(undefined, palaceBoard));
 
@@ -41,16 +49,12 @@
 	venue.publish("mega event", "Die Doofen sind da!");
 
 	document.getElementById("unsubscribe-palace").addEventListener('click'
-			, function()
-			{
-				palace.unsubscribe(palaceSubscription);
-			}, false);
+			, palaceSubscription.dispose
+			, false);
 
 	document.getElementById("unsubscribe-venue").addEventListener('click'
-			, function()
-			{
-				venue.unsubscribe(venueSubscription);
-			}, false);
+			, venueSubscription.dispose
+			, false);
 
 	document.getElementById("announce-palace").addEventListener('click'
 			, function()
@@ -63,6 +67,10 @@
 			{
 				venue.publish("mega event", "Venue Birthday Party");
 			}, false);
+
+	document.getElementById("unsubscribe-all").addEventListener('click'
+			, venue.unsubscribeAll
+			, false);
 
 
 </script>

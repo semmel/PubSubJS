@@ -4,6 +4,8 @@ License: MIT - http://mrgnrdrck.mit-license.org
 
 Copyright (c) 2014 Visisoft OHG http://visisoft.de
 https://github.com/semmel/PubSubJS
+
+see Crockford: JavaScript: The Good Parts, section "Parts"
 */
 /*jslint white:true, plusplus:true, stupid:true*/
 /*global
@@ -59,22 +61,28 @@ https://github.com/semmel/PubSubJS
 		subscriber( message, data );
 	}
 
-	function createPublisher()
+	/**
+	 * Adds PubSub functionality to the given object.
+	 * I.e. augments <tt>publish, publishSync, subscribe</tt> and <tt>unsubscribe</tt> methods.
+	 * @param {Object=} subject If not given a plain PubSub object is returned
+	 * @returns {Object}
+	 */
+	function createPublisher(subject)
 	{
 		var
-			self = {},
-			messages = {},
+			self = subject || {},
+			registry = {},
 			lastUid = -1;
 
 
 		function deliverMessage( originalMessage, matchedMessage, data, immediateExceptions )
 		{
-			var subscribers = messages[matchedMessage];
+			var subscribers = registry[matchedMessage];
 			var callSubscriber = immediateExceptions ? callSubscriberWithImmediateExceptions
 					: callSubscriberWithDelayedExceptions;
 			var i;
 
-			if ( !messages.hasOwnProperty( matchedMessage ) ) {
+			if ( !registry.hasOwnProperty( matchedMessage ) ) {
 				return;
 			}
 
@@ -106,16 +114,16 @@ https://github.com/semmel/PubSubJS
 
 		function messageHasSubscribers( message ){
 			var topic = String( message ),
-				found = messages.hasOwnProperty( topic ),
+				found = registry.hasOwnProperty( topic ),
 				position = topic.lastIndexOf( '.' );
 
 			while ( !found && position !== -1 ){
 				topic = topic.substr( 0, position );
 				position = topic.lastIndexOf('.');
-				found = messages.hasOwnProperty( topic );
+				found = registry.hasOwnProperty( topic );
 			}
 
-			return found && messages[topic].length > 0;
+			return found && registry[topic].length > 0;
 		}
 
 		function publish( message, data, sync, immediateExceptions ){
@@ -167,17 +175,19 @@ https://github.com/semmel/PubSubJS
 			}
 
 			// message is not registered yet
-			if ( !messages.hasOwnProperty( message ) ){
-				messages[message] = [];
+			if ( !registry.hasOwnProperty( message ) ){
+				registry[message] = [];
 			}
 
 			// forcing token as String, to allow for future expansions without breaking usage
 			// and allow for easy use as key names for the 'messages' object
 			var token = String(++lastUid);
-			messages[message].push( { token : token, func : func } );
+			registry[message].push( { token : token, func : func } );
 
 			// return token for unsubscribing
-			return token;
+			//return token;
+			// return a subscription object with a dispose method
+			return { dispose: self.unsubscribe.bind(self, token) };
 		};
 
 		/**
@@ -189,17 +199,17 @@ https://github.com/semmel/PubSubJS
 		self.unsubscribe = function( tokenOrFunction ){
 			var isToken = typeof tokenOrFunction === 'string',
 				key = isToken ? 'token' : 'func',
-				succesfulReturnValue = isToken ? tokenOrFunction : true,
+				successfulReturnValue = isToken ? tokenOrFunction : true,
 
 				result = false,
 				m, i;
 
-			for ( m in messages ){
-				if ( messages.hasOwnProperty( m ) ){
-					for ( i = messages[m].length-1 ; i >= 0; i-- ){
-						if ( messages[m][i][key] === tokenOrFunction ){
-							messages[m].splice( i, 1 );
-							result = succesfulReturnValue;
+			for ( m in registry ){
+				if ( registry.hasOwnProperty( m ) ){
+					for ( i = registry[m].length-1 ; i >= 0; i-- ){
+						if ( registry[m][i][key] === tokenOrFunction ){
+							registry[m].splice( i, 1 );
+							result = successfulReturnValue;
 
 							// tokens are unique, so we can just return here
 							if ( isToken ){
@@ -211,6 +221,13 @@ https://github.com/semmel/PubSubJS
 			}
 
 			return result;
+		};
+
+		/// remove all references to the subscribers
+		/// useful if the publisher is destroyed
+		self.unsubscribeAll = function()
+		{
+			registry = {};
 		};
 
 		return self;
