@@ -20,6 +20,10 @@
 	<br/>
 
 	<div style="font-weight: bold" id="ticker">Venue Ticker:<br /></div>
+	<div style="font-style: italic" id="concerts">Concert Ticker:<br />
+		<button type="button" id="subscribe-concerts">Subscribe for Concerts</button>
+		<button type="button" id="unsubscribe-concerts">Unsubscribe Concerts</button>
+	</div>
 
 
 <script>
@@ -30,6 +34,7 @@
 	var palaceBoard = document.getElementById("concert-palace");
 	var venueBoard = document.getElementById("big-venue");
 	var tickerBoard = document.getElementById("ticker");
+	var concertBoard = document.getElementById("concerts");
 
 	function tellWhat(target, what)
 	{
@@ -44,6 +49,8 @@
 	palace.publish("mega event", "Scooter is in the house!");
 
 	var venueSubscription = venue.subscribe("mega event", tellWhat.bind(undefined, venueBoard));
+
+	var concertsSubscription = { dispose: function(){} };
 
 	palace.publish("mega event", "HIP is in the house!");
 
@@ -78,6 +85,18 @@
 	document.getElementById("unsubscribe-all").addEventListener('click'
 			, venue.unsubscribeAll
 			, false);
+
+	document.getElementById("subscribe-concerts").addEventListener('click'
+			, function()
+			{
+				concertsSubscription = venue.subscribe("mega event.concert", tellWhat.bind(undefined, concertBoard));
+			}, false);
+
+	document.getElementById("unsubscribe-concerts").addEventListener('click'
+			, function()
+			{
+				concertsSubscription.dispose();
+			}, false);
 
 
 </script>

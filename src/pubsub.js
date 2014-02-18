@@ -39,6 +39,17 @@ see Crockford: JavaScript: The Good Parts, section "Parts"
 }( ( typeof window === 'object' && window ) || this
 	, function()
 {
+	function hasKeys(obj){
+		var key;
+
+		for (key in obj){
+			if ( obj.hasOwnProperty(key) ){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 *	Returns a function that throws the passed exception, for use as argument for setTimeout
 	 *	@param { Object } ex An Error object
@@ -71,27 +82,26 @@ see Crockford: JavaScript: The Good Parts, section "Parts"
 	{
 		var
 			self = subject || {},
-			registry = {},
+			messages = {},
 			lastUid = -1;
 
 
 		function deliverMessage( originalMessage, matchedMessage, data, immediateExceptions )
 		{
-			var subscribers = registry[matchedMessage];
-			var callSubscriber = immediateExceptions ? callSubscriberWithImmediateExceptions
-					: callSubscriberWithDelayedExceptions;
-			var i;
+			var
+				subscribers = messages[matchedMessage],
+				callSubscriber = immediateExceptions ? callSubscriberWithImmediateExceptions
+					: callSubscriberWithDelayedExceptions,
+				s;
 
-			if ( !registry.hasOwnProperty( matchedMessage ) ) {
+			if ( !messages.hasOwnProperty( matchedMessage ) ) {
 				return;
 			}
 
-			// do not cache the length of the subscribers array, as it might change if there are unsubscribtions
-			// by subscribers during delivery of a topic
-			// see https://github.com/mroderick/PubSubJS/issues/26
-			for (i = 0; i < subscribers.length; i++ )
-			{
-				callSubscriber( subscribers[i].func, originalMessage, data );
+			for (s in subscribers){
+				if ( subscribers.hasOwnProperty(s)){
+					callSubscriber( subscribers[s], originalMessage, data );
+				}
 			}
 		}
 
@@ -114,16 +124,16 @@ see Crockford: JavaScript: The Good Parts, section "Parts"
 
 		function messageHasSubscribers( message ){
 			var topic = String( message ),
-				found = registry.hasOwnProperty( topic ),
+				found = Boolean(messages.hasOwnProperty( topic ) && hasKeys(messages[topic])),
 				position = topic.lastIndexOf( '.' );
 
 			while ( !found && position !== -1 ){
 				topic = topic.substr( 0, position );
 				position = topic.lastIndexOf('.');
-				found = registry.hasOwnProperty( topic );
+				found = Boolean(messages.hasOwnProperty( topic ) && hasKeys(messages[topic]));
 			}
 
-			return found && registry[topic].length > 0;
+			return found;
 		}
 
 		function publish( message, data, sync, immediateExceptions ){
@@ -175,14 +185,14 @@ see Crockford: JavaScript: The Good Parts, section "Parts"
 			}
 
 			// message is not registered yet
-			if ( !registry.hasOwnProperty( message ) ){
-				registry[message] = [];
+			if ( !messages.hasOwnProperty( message ) ){
+				messages[message] = {};
 			}
 
 			// forcing token as String, to allow for future expansions without breaking usage
 			// and allow for easy use as key names for the 'messages' object
-			var token = String(++lastUid);
-			registry[message].push( { token : token, func : func } );
+			var token = 'uid_' + String(++lastUid);
+			messages[message][token] = func;
 
 			// return token for unsubscribing
 			//return token;
@@ -198,22 +208,23 @@ see Crockford: JavaScript: The Good Parts, section "Parts"
 		**/
 		self.unsubscribe = function( tokenOrFunction ){
 			var isToken = typeof tokenOrFunction === 'string',
-				key = isToken ? 'token' : 'func',
-				successfulReturnValue = isToken ? tokenOrFunction : true,
-
 				result = false,
-				m, i;
+				m, message, t, token;
 
-			for ( m in registry ){
-				if ( registry.hasOwnProperty( m ) ){
-					for ( i = registry[m].length-1 ; i >= 0; i-- ){
-						if ( registry[m][i][key] === tokenOrFunction ){
-							registry[m].splice( i, 1 );
-							result = successfulReturnValue;
+			for ( m in messages ){
+				if ( messages.hasOwnProperty( m ) ){
+					message = messages[m];
 
-							// tokens are unique, so we can just return here
-							if ( isToken ){
-								return result;
+					if ( isToken && message[tokenOrFunction] ){
+						delete message[tokenOrFunction];
+						result = tokenOrFunction;
+						// tokens are unique, so we can just stop here
+						break;
+					} else if (!isToken){
+						for ( t in message ){
+							if (message.hasOwnProperty(t) && message[t] === tokenOrFunction){
+								delete message[t];
+								result = true;
 							}
 						}
 					}
@@ -227,7 +238,7 @@ see Crockford: JavaScript: The Good Parts, section "Parts"
 		/// useful if the publisher is destroyed
 		self.unsubscribeAll = function()
 		{
-			registry = {};
+			messages = {};
 		};
 
 		return self;
