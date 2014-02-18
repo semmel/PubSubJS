@@ -160,6 +160,11 @@ Setting immediate exceptions in development is easy, just tell PubSubJS about it
 var publisher = createPublisher();
 publisher.immediateExceptions = true;
 ```
+## Road map
+
+* subscribe for multiple events with a single handler
+* disallow events containing spaces
+
 
 ## More about Publish/Subscribe
 

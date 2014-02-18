@@ -42,19 +42,19 @@
 				+ "<br/>");
 	}
 
-	var tickerSubscription = venue.subscribe("mega event", tellWhat.bind(undefined, tickerBoard));
+	var tickerSubscription = venue.subscribe("mega_event", tellWhat.bind(undefined, tickerBoard));
 
-	var palaceSubscription = palace.subscribe("mega event", tellWhat.bind(undefined, palaceBoard));
+	var palaceSubscription = palace.subscribe("mega_event", tellWhat.bind(undefined, palaceBoard));
 
-	palace.publish("mega event", "Scooter is in the house!");
+	palace.publish("mega_event", "Scooter is in the house!");
 
-	var venueSubscription = venue.subscribe("mega event", tellWhat.bind(undefined, venueBoard));
+	var venueSubscription = venue.subscribe("mega_event", tellWhat.bind(undefined, venueBoard));
 
 	var concertsSubscription = { dispose: function(){} };
 
-	palace.publish("mega event", "HIP is in the house!");
+	palace.publish("mega_event", "HIP is in the house!");
 
-	venue.publish("mega event", "Die Doofen sind da!");
+	venue.publish("mega_event", "Die Doofen sind da!");
 
 	document.getElementById("unsubscribe-palace").addEventListener('click'
 			, palaceSubscription.dispose
@@ -67,19 +67,19 @@
 	document.getElementById("announce-palace").addEventListener('click'
 			, function()
 			{
-				palace.publish("mega event", "Grand Palace Opening");
+				palace.publish("mega_event", "Grand Palace Opening");
 			}, false);
 
 	document.getElementById("announce-venue").addEventListener('click'
 			, function()
 			{
-				venue.publish("mega event", "Venue Birthday Party");
+				venue.publish("mega_event", "Venue Birthday Party");
 			}, false);
 
 	document.getElementById("announce-concert-venue").addEventListener('click'
 			, function()
 			{
-				venue.publish("mega event.concert", "Avishai Cohen Trio");
+				venue.publish("mega_event.concert", "Avishai Cohen Trio");
 			}, false);
 
 	document.getElementById("unsubscribe-all").addEventListener('click'
@@ -89,7 +89,7 @@
 	document.getElementById("subscribe-concerts").addEventListener('click'
 			, function()
 			{
-				concertsSubscription = venue.subscribe("mega event.concert", tellWhat.bind(undefined, concertBoard));
+				concertsSubscription = venue.subscribe("mega_event.concert", tellWhat.bind(undefined, concertBoard));
 			}, false);
 
 	document.getElementById("unsubscribe-concerts").addEventListener('click'
