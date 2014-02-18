@@ -14,11 +14,12 @@
 		Big Venue:<br />
 		<button type="button" id="unsubscribe-venue">Unsubscribe</button><br/>
 		<button type="button" id="announce-venue">Announce</button><br/>
+		<button type="button" id="announce-concert-venue">Announce a Mega Concert</button><br/>
 		<button type="button" id="unsubscribe-all">Unsubscribe All From Venue</button>
 	</div>
 	<br/>
 
-	<div style="font-weight: bold" id="ticker">Ticker:<br /></div>
+	<div style="font-weight: bold" id="ticker">Venue Ticker:<br /></div>
 
 
 <script>
@@ -66,6 +67,12 @@
 			, function()
 			{
 				venue.publish("mega event", "Venue Birthday Party");
+			}, false);
+
+	document.getElementById("announce-concert-venue").addEventListener('click'
+			, function()
+			{
+				venue.publish("mega event.concert", "Avishai Cohen Trio");
 			}, false);
 
 	document.getElementById("unsubscribe-all").addEventListener('click'

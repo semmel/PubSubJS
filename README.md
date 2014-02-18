@@ -10,7 +10,6 @@ For the adventurous, PubSubJS also supports synchronous message publication. Thi
 
 * PubSub is instantiable. I.e. there is no singleton `PubSub` as in [@mroderick's original branch](https://github.com/mroderick/PubSubJS). Instead there is the creation function `createPublisher`.
 
-For benchmarks, see [A Comparison of JS Publish/Subscribe Approaches](http://jsperf.com/pubsubjs-vs-jquery-custom-events/51)
 
 ## Key features
 
