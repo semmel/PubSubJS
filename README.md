@@ -9,13 +9,14 @@ For the adventurous, PubSubJS also supports synchronous message publication. Thi
 ## Changes to the original project
 
 * PubSub is instantiable. I.e. there is no singleton `PubSub` as in [@mroderick's original branch](https://github.com/mroderick/PubSubJS). Instead there is the creation function `createPublisher`.
+* Flexible subscriber function signature.
 
 
 ## Key features
 
 * Dependency free
 * Synchronization decoupling
-* ES3 compatible. PubSubJS should be able to run everywhere that can execute JavaScript. Browsers, servers, ebook readers, old phones, game consoles.
+* Topic hierarchy
 * AMD / CommonJS module support
 * No modification of subscribers (jQuery custom events modify subscribers)
 * Easy to understand and use (thanks to synchronization decoupling)
@@ -34,12 +35,13 @@ var mySubscriber = function( msg, data ){
 var publisher = createPublisher();
 
 // add the function to the list of subscribers for a particular message
-// we're keeping the returned token, in order to be able to unsubscribe
+// we're keeping the returned subscription object, in order to be able to unsubscribe
 // from the message later on
-var token = publisher.subscribe( 'MY MESSAGE', mySubscriber );
+var subscription = publisher.subscribe( 'MY MESSAGE', mySubscriber );
 
 // publish a message asyncronously
 publisher.publish( 'MY MESSAGE', 'hello world!' );
+// logs 'MY MESSAGE', 'hello world!' to the console 
 
 // publish a message syncronously, which is faster in some environments,
 // but will get confusing when one message triggers new messages in the
@@ -51,7 +53,7 @@ publisher.publishSync( 'MY MESSAGE', 'hello world!' );
 ### Cancel specific subscripiton
 
 ```javascript
-// create a function to receive the message
+// create a handler function to receive the message
 var mySubscriber = function( msg, data ){
     console.log( msg, data );
 };
@@ -87,6 +89,28 @@ publisher.unsubscribe( mySubscriber );
 
 // dispose ALL subscribers, e.g. before the publisher is destroyed.
 publisher.unsubscribeAll();
+```
+
+### Change the handler functions' signature
+
+```javascript
+// this handler function receives the event's payload in it's single argument
+var mySubscriber = function( data ){
+    console.log( data );
+};
+
+var publisher = createPublisher({
+	handlerInvoker: function(handler, message, payload){
+			handler(payload);
+		}
+	}
+);
+
+// register the handler
+var subscription = publisher.subscribe( 'topic', mySubscriber );
+
+publisher.publish( 'topic', 'hello world!' );
+// logs 'hello world!' to the console 
 ```
 
 ### Hierarchical addressing

@@ -60,18 +60,6 @@ see Crockford: JavaScript: The Good Parts, section "Parts"
 		};
 	}
 
-	function callSubscriberWithDelayedExceptions( subscriber, message, data ){
-		try {
-			subscriber( message, data );
-		} catch( ex ){
-			setTimeout( throwException( ex ), 0);
-		}
-	}
-
-	function callSubscriberWithImmediateExceptions( subscriber, message, data ){
-		subscriber( message, data );
-	}
-
 	/**
 	 * Adds PubSub functionality to the given object.
 	 * I.e. augments <tt>publish, publishSync, subscribe</tt> and <tt>unsubscribe</tt> methods.
@@ -85,6 +73,29 @@ see Crockford: JavaScript: The Good Parts, section "Parts"
 			messages = {},
 			lastUid = -1;
 
+		/**
+		 * adapt the parameters to the handlers function signature
+		 * @param {Function} handler the registered subscriber for the particular topic
+		 * @param {String} message the topic
+		 * @param {} data the event payload
+		 * @type {Function|*}
+		 */
+		self.handlerInvoker = self.handlerInvoker || function(handler, message, data)
+		{
+			handler.call(undefined, message, data);
+		};
+
+		function callSubscriberWithDelayedExceptions( subscriber, message, data ){
+			try {
+				self.handlerInvoker(subscriber, message, data );
+			} catch( ex ){
+				setTimeout( throwException( ex ), 0);
+			}
+		}
+
+		function callSubscriberWithImmediateExceptions( subscriber, message, data ){
+			self.handlerInvoker(subscriber, message, data );
+		}
 
 		function deliverMessage( originalMessage, matchedMessage, data, immediateExceptions )
 		{

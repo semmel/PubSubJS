@@ -28,7 +28,12 @@
 
 <script>
 
-	var palace = createPublisher();
+	var palace = createPublisher({
+		handlerInvoker: function(handler, message, payload)
+		{
+			handler(payload);
+		}
+	});
 	var venue = createPublisher();
 
 	var palaceBoard = document.getElementById("concert-palace");
@@ -90,6 +95,7 @@
 			, function()
 			{
 				concertsSubscription = venue.subscribe("mega_event.concert", tellWhat.bind(undefined, concertBoard));
+				palace.subscribe("mega_event", tellWhat.bind(undefined, concertBoard));
 			}, false);
 
 	document.getElementById("unsubscribe-concerts").addEventListener('click'
